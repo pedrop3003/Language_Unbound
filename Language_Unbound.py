@@ -51,8 +51,8 @@ os.remove('testing.wav')
 #Speech-to-text module
 import os
 from google.cloud import speech
-
-client = speech.SpeechClient.from_service_account_file('key.json')
+#json file insert
+client = speech.SpeechClient.from_service_account_file('.json')
 
 media_file = "testing.mp3"
 
@@ -81,8 +81,8 @@ print(transcript)
 #Translation module
 import os
 from google.cloud import translate_v2
-
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'key.json'
+#json file insert
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'.json'
 
 translate_client = translate_v2.Client()
 
@@ -115,8 +115,8 @@ import os
 from unicodedata import name
 from urllib import response
 from google.cloud import texttospeech_v1
-
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'key.json'
+#json file insert
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '.json'
 client = texttospeech_v1.TextToSpeechClient()
 
 text = translated
