@@ -1,59 +1,51 @@
-import pyaudio
-import wave
+import sounddevice as sd
+import numpy as np
+from pydub import AudioSegment
+from pydub.playback import play
+import os
+os.chdir('/home/langunbound/Desktop/translate_project')
+import sys
+import os
+import pyfiglet
+def print_big_text(message):
+    font = pyfiglet.Figlet()
+    ascii_art = font.renderText(message)
+    print(ascii_art)
 
+def restart_program():
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
 
-chunk = 1024  # Record in chunks of 1024 samples
-sample_format = pyaudio.paInt16  # 16 bits per sample
-channels = 1
-fs = 44100  # Record at 44100 samples per second
+if __name__ == "__main__":
+    print_big_text("Welcome to Language Unbound!")
+    fs = 44100  # Record at 44100 samples per second
 seconds = 5
-filename = "testing.wav"
-
-p = pyaudio.PyAudio()  # Create an interface to PortAudio
+filename = "testing.mp3"
 
 print('Recording')
 
-stream = p.open(format=sample_format,
-                channels=channels,
-                rate=fs,
-                frames_per_buffer=chunk,
-                input=True)
 
-frames = []  # Initialize array to store frames
+audio_data = sd.rec(int(fs*seconds), samplerate = fs, channels=2, dtype = 'int16')
+sd.wait()
 
-# Store data in chunks for 3 seconds
-for i in range(0, int(fs / chunk * seconds)):
-    data = stream.read(chunk)
-    frames.append(data)
+audio_segment = AudioSegment(
+    audio_data.tobytes(),
+    frame_rate=fs,
+    sample_width=audio_data.dtype.itemsize,
+    channels=2
+)
+current_directory = os.getcwd()
+output_path = os.path.join(current_directory, filename)
 
-# Stop and close the stream 
-stream.stop_stream()
-stream.close()
-# Terminate the PortAudio interface
-p.terminate()
+print('finished recording')
+audio_segment.export(filename, format='mp3')
 
-print('Finished recording')
-
-# Save the recorded data as a WAV file
-wf = wave.open(filename, 'wb')
-wf.setnchannels(channels)
-wf.setsampwidth(p.get_sample_size(sample_format))
-wf.setframerate(fs)
-wf.writeframes(b''.join(frames))
-wf.close()
-from pydub import AudioSegment
-sound = AudioSegment.from_wav('testing.wav')
-
-sound.export('testing.mp3', format='mp3')
-import os
-os.remove('testing.wav')
 
 #Speech-to-text module
 import os
 from google.cloud import speech
-#json file insert
-client = speech.SpeechClient.from_service_account_file('.json')
 
+client = speech.SpeechClient.from_service_account_file('key.json')
 media_file = "testing.mp3"
 
 with open(media_file, 'rb') as f:
@@ -81,24 +73,24 @@ print(transcript)
 #Translation module
 import os
 from google.cloud import translate_v2
-#json file insert
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'.json'
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'key.json'
 
 translate_client = translate_v2.Client()
 
 #language list for each language
-language_list = [ "These are the available lanuages: ","French - fr", "Spanish - es", "Japanese - ja", "Ukranian - uk",
-                 "Portuguese(brazil) - pt-BR", "German - de", "Chinese(PRC) - zn-CN",
-                 "Thai - th", "Italian - it"]
+language_list = [ "These are the available lanuages: ","Arabic - ar", "French - fr", "Japanese - ja", "Ukranian - uk",
+                 "Portuguese(brazil) - pt", "German - de", "Chinese(Simplified) - zh", "Hungarian - hu", "Indonesian - id",
+                 "Thai - th", "Italian - it", "Polish - pl", "Russian - ru", "Hebrew - he"]
+
 
 # print each string in the list
 for lang in language_list:
-    print(lang)
+   print(lang)
 
 code = input('which langauge would you like to translate to?')
 text = transcript
 target = code
-
 output = translate_client.translate(
     text,
     target_language=target
@@ -109,14 +101,15 @@ print("This is your translation result: ")
 #print(output)
 #this is simply the string of translated text language
 print(translated)
+#dsiplay (translated)
 
 #Text-to-speech module
 import os
 from unicodedata import name
 from urllib import response
 from google.cloud import texttospeech_v1
-#json file insert
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '.json'
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'key.json'
 client = texttospeech_v1.TextToSpeechClient()
 
 text = translated
@@ -124,7 +117,7 @@ text = translated
 synthesis_input = texttospeech_v1.SynthesisInput(text=text)
 voice1 = texttospeech_v1.VoiceSelectionParams(
     language_code=code,
-    ssml_gender=texttospeech_v1.SsmlVoiceGender.NEUTRAL
+    ssml_gender=texttospeech_v1.SsmlVoiceGender.FEMALE
 )
 
 
@@ -153,3 +146,9 @@ audio = AudioSegment.from_file(mp3_file, format="mp3")
 
 # play the audio
 play(audio)
+user_input = input("Do you want to restart the program? (yes/no): ").lower()
+
+if user_input == "yes" or user_input == "y":
+        restart_program()
+else:
+        print("Exiting the program.")
