@@ -1,3 +1,16 @@
+import sys
+import os
+import pyfiglet
+
+def print_big_text(message):
+    font = pyfiglet.Figlet()
+    ascii_art = font.renderText(message)
+    print(ascii_art)
+
+def restart_program():
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
+
 MORSE_CODE_DICT = { 'A':'.-', 'B':'-...',
                     'C':'-.-.', 'D':'-..', 'E':'.',
                     'F':'..-.', 'G':'--.', 'H':'....',
@@ -73,10 +86,10 @@ def decrypt(message):
  
 # Hard-coded driver function to run the program
 def main():
-    #message = "this is our morse code translation module"
-    #result = encrypt(message.upper())
-    #print (result)
- 
+    message = "this is our morse code translation module"
+    result = encrypt(message.upper())
+    print (result)
+    print_big_text("Welcome to Language Unbound Morse Code Translation!")
     message = input('what is your morse code input? ')
     result = decrypt(message)
     print (result)
@@ -84,3 +97,10 @@ def main():
  
 if __name__ == '__main__':
     main()
+
+user_input = input("Do you want to restart the program? (yes/no): ").lower()
+
+if user_input == "yes" or user_input == "y":
+        restart_program()
+else:
+        print("Exiting the program.")
